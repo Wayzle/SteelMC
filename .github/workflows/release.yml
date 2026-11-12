@@ -79,13 +79,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
           rustup target add ${{ matrix.target }}
-      - name: Android build
+      - name: Install cross
         if: matrix.target == 'x86_64-linux-android'
         uses: houseabsolute/actions-rust-cross@v1
-        with:
-          command: build
-          target: ${{ matrix.target }}
-          args: "--release --no-default-features --features tls-native,mimalloc"
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
+          cross build --target ${{ matrix.target }} --release --no-default-features --features tls-native,mimalloc
       - name: Build portable release binary
         if: matrix.target != 'x86_64-linux-android'
         env:
