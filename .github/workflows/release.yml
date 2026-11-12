@@ -53,6 +53,7 @@ jobs:
             os: ubuntu-latest
             artifact: steel
             target: ""
+            cargo_command: cargo
           - name: steel-linux-musl
             os: ubuntu-latest
             artifact: steel
@@ -84,8 +85,7 @@ jobs:
         with:
           command: build
           target: ${{ matrix.target }}
-          args: "--release"
-          strip: true
+          args: "--release --no-default-features --features tls-native,mimalloc"
       - name: Build portable release binary
         if: matrix.target != 'x86_64-linux-android'
         env:
