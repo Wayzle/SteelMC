@@ -49,23 +49,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: steel-linux
-            os: ubuntu-latest
-            artifact: steel
-            target: ""
-            cargo_command: cargo
-          - name: steel-linux-musl
-            os: ubuntu-latest
-            artifact: steel
-            target: x86_64-unknown-linux-musl
-          - name: steel-windows
-            os: windows-latest
-            artifact: steel.exe
-            target: ""
-          - name: steel-macos
-            os: macos-latest
-            artifact: steel
-            target: ""
+          # - name: steel-linux
+          #   os: ubuntu-latest
+          #   artifact: steel
+          #   target: ""
+          # - name: steel-linux-musl
+          #   os: ubuntu-latest
+          #   artifact: steel
+          #   target: x86_64-unknown-linux-musl
+          # - name: steel-windows
+          #   os: windows-latest
+          #   artifact: steel.exe
+          #   target: ""
+          # - name: steel-macos
+          #   os: macos-latest
+          #   artifact: steel
+          #   target: ""
           - name: steel-androidx86_64
             os: ubuntu-latest
             artifact: steel
