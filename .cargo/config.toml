@@ -10,18 +10,6 @@ rustflags = ["-Clink-arg=-fuse-ld=lld", "-Zthreads=0"]
 [target.aarch64-unknown-linux-gnu]
 rustflags = ["-Clink-arg=-fuse-ld=lld", "-Zthreads=0"]
 
-[target.aarch64-linux-android]
-linker = "aarch64-linux-android-clang"
- 
-[target.armv7-linux-androideabi]
-linker = "armv7a-linux-androideabi-clang"
- 
-[target.i686-linux-android]
-linker = "i686-linux-android-clang"
- 
-[target.x86_64-linux-android]
-linker = "x86_64-linux-android-clang"
-
 [alias]
 flint = ["test", "-p", "steel-flint", "--profile", "flint", "test_run_flint_selected", "--", "--ignored"]
 flint-dev = ["test", "-p", "steel-flint", "test_run_flint_selected", "--", "--ignored"]
