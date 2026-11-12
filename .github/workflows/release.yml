@@ -54,18 +54,21 @@ jobs:
             artifact: steel
             target: ""
             cross: false
-          # - name: steel-linux-musl
-          #   os: ubuntu-latest
-          #   artifact: steel
-          #   target: x86_64-unknown-linux-musl
-          # - name: steel-windows
-          #   os: windows-latest
-          #   artifact: steel.exe
-          #   target: ""
-          # - name: steel-macos
-          #   os: macos-latest
-          #   artifact: steel
-          #   target: ""
+          - name: steel-linux-musl
+            os: ubuntu-latest
+            artifact: steel
+            target: x86_64-unknown-linux-musl
+            cross: false
+          - name: steel-windows
+            os: windows-latest
+            artifact: steel.exe
+            target: ""
+            cross: false
+          - name: steel-macos
+            os: macos-latest
+            artifact: steel
+            target: ""
+            cross: false
           - name: steel-android-x86_64
             os: ubuntu-latest
             artifact: steel
@@ -85,14 +88,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
           rustup target add ${{ matrix.target }}
-      - name: Install cross
-        if: matrix.cross
-        run: |
-          cargo install cross --git https://github.com/cross-rs/cross
-      - name: Build portable release binary
+      - name: Build portable release binary(cross)
+        if: ${{ matrix.cross }}
         env:
           RUSTFLAGS: ${{ matrix.rustflags }}
-        run: ${{ matrix.cross && 'cross' || 'cargo' }} build --release ${{ matrix.target && format('--target {0}', matrix.target) || '' }} --features stand-alone,deadlock_detection --verbose ${{ matrix.cross && '--no-default-features --features tls-native,mimalloc' || '' }}
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
+          cross build ${{ matrix.target }} --no-default-features --features stand-alone,deadlock_detection,tls-native,mimalloc --verbose
+      - name: Build portable release binary
+        if: ${{ !matrix.cross }}
+        env:
+          RUSTFLAGS: ${{ matrix.rustflags }}
+        run: cargo build --release ${{ matrix.target && format('--target {0}', matrix.target) || '' }} --features stand-alone,deadlock_detection --verbose
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
@@ -115,10 +122,10 @@ jobs:
       - name: Prepare release assets
         run: |
           mkdir -p release
-          # mv artifacts/steel-linux/steel release/steel-linux
-          # mv artifacts/steel-linux-musl/steel release/steel-linux-musl
-          # mv artifacts/steel-windows/steel.exe release/steel-windows.exe
-          # mv artifacts/steel-macos/steel release/steel-macos
+          mv artifacts/steel-linux/steel release/steel-linux
+          mv artifacts/steel-linux-musl/steel release/steel-linux-musl
+          mv artifacts/steel-windows/steel.exe release/steel-windows.exe
+          mv artifacts/steel-macos/steel release/steel-macos
           mv artifacts/steel-android-x86_64/steel release/steel-android-x86_64
           mv artifacts/steel-android-aarch64/steel release/steel-android-aarch64
 
