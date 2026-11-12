@@ -84,13 +84,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
           rustup target add ${{ matrix.target }}
-      - name: Build portable release android binary
+      - name: Install cross
         if: matrix.target == 'x86_64-linux-android'
         run: |
           cargo install cross --git https://github.com/cross-rs/cross
-
       - name: Build portable release binary
-        if: matrix.target != 'x86_64-linux-android'
         env:
           RUSTFLAGS: ${{ matrix.rustflags }}
         run: ${{ matrix.cross && 'cross' || 'cargo' }} build --release ${{ matrix.target && format('--target {0}', matrix.target) || '' }} --features stand-alone,deadlock_detection --verbose ${{ matrix.cross && '--no-default-features --features tls-native,mimalloc' || '' }}
