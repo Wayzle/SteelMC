@@ -32,12 +32,14 @@ use crate::world::{World, WorldConfig, WorldStorageConfig};
 use crate::worldgen::generator::{GenerationChunk, TerrainPhase};
 use crate::worldgen::{ChunkGenerator, ChunkGeneratorType, WorldGenContext};
 use flate2::read::GzDecoder;
+use gdt_cpus::ThreadPriority;
 use glam::IVec3;
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 use serde::Deserialize;
 use steel_registry::blocks::block_state_ext::BlockStateExt;
 use steel_registry::structure::TerrainAdjustment;
 use steel_registry::{dimension_type::DimensionTypeRef, vanilla_dimension_types};
+use steel_utils::threading::custom_spawn_handler;
 use steel_utils::types::{Difficulty, GameType};
 use steel_utils::{ChunkPos, Identifier};
 use steel_worldgen::density_functions::{
@@ -1169,6 +1171,7 @@ fn chunk_stage_hashes_inner() {
 
         let thread_pool = Arc::new(
             rayon::ThreadPoolBuilder::new()
+                .spawn_handler(custom_spawn_handler(ThreadPriority::Normal))
                 .num_threads(1)
                 .thread_name(|index| format!("chunk-stage-hashes-{index}"))
                 .build()

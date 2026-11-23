@@ -45,6 +45,7 @@ rand.workspace = true
 text_components.workspace = true
 toml.workspace = true
 unicode_names2.workspace = true
+gdt-cpus = "0.2606.1"
 
 [dev-dependencies]
 criterion.workspace = true

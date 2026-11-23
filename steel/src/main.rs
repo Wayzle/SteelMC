@@ -10,6 +10,7 @@ use std::{env, panic, thread};
 use crossterm::style::Attribute::{Bold, Dim, Reset};
 use crossterm::style::{Color, ResetColor, SetForegroundColor};
 use futures::FutureExt;
+use gdt_cpus::ThreadPriority;
 use steel::config::{self, LogConfig};
 use steel::logger::CommandLogger;
 use steel::{SERVER, SteelServer, logger::LoggerLayer};
@@ -17,7 +18,9 @@ use steel_core::GIT_HASH_SHORT;
 use steel_utils::text::DisplayResolutor;
 #[cfg(all(windows, debug_assertions))]
 use steel_utils::threading::DEBUG_STACK_SIZE;
-use steel_utils::threading::{available_worker_threads, worker_threads_for_available};
+use steel_utils::threading::{
+    available_worker_threads, set_recommended_thread_conf, worker_threads_for_available,
+};
 use text_components::fmt::set_display_resolutor;
 use tokio::runtime::{Builder, Runtime};
 use tokio_util::{sync::CancellationToken, task::TaskTracker};
@@ -149,6 +152,8 @@ fn main() {
 fn steel_main() {
     #[cfg(feature = "dhat-heap")]
     let _profiler = dhat::Profiler::new_heap();
+
+    set_recommended_thread_conf(ThreadPriority::Normal);
 
     // Load config once at startup
     let steel_config = match config::load_or_create(Path::new("config/config.toml")) {

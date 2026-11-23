@@ -1,5 +1,6 @@
 //! Thread-count selection helpers.
 
+use gdt_cpus::{ThreadPriority, set_thread_priority};
 use std::num::NonZero;
 use std::thread;
 
@@ -28,6 +29,38 @@ pub fn worker_threads_for_available(
     }
 
     ((available_threads / 2).max(2)).min(available_threads)
+}
+
+/// Custom handler for rayon ThreadPoolBuilder spawn_handler(),
+/// allows to set priority for thread.
+pub fn custom_spawn_handler(
+    priority: ThreadPriority,
+) -> impl FnMut(rayon::ThreadBuilder) -> std::io::Result<()> {
+    move |thread| {
+        let mut b = std::thread::Builder::new();
+        if let Some(name) = thread.name() {
+            b = b.name(name.to_owned());
+        }
+        if let Some(stack_size) = thread.stack_size() {
+            b = b.stack_size(stack_size);
+        }
+        b.spawn(move || {
+            set_recommended_thread_conf(priority);
+            thread.run()
+        })?;
+        Ok(())
+    }
+}
+
+/// Sets the recommended thread affinity and priority based on cpu information.
+pub fn set_recommended_thread_conf(priority: ThreadPriority) {
+    match set_thread_priority(priority) {
+        Ok(applied) if applied.degraded() => {
+            eprintln!("priority silently weakened: {}", applied);
+        }
+        Ok(applied) => println!("priority set: {}", applied),
+        Err(e) => eprintln!("priority change failed: {}", e),
+    }
 }
 
 #[cfg(test)]

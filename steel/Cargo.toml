@@ -49,6 +49,7 @@ mimalloc = { version = "0.1.52", optional = true }
 # Profiling
 dhat = { version = "0.3.3", optional = true }
 strip-ansi-escapes = "0.2.1"
+gdt-cpus = "0.2606.1"
 
 [lints]
 workspace = true

@@ -44,6 +44,7 @@ use crate::entity::{
     Entity, EntityBase, PendingWorldChangeToken, RemovalReason, SharedEntity, change_entity_world,
 };
 use crate::loot::random_sequences::DomainRandomSequences;
+use gdt_cpus::ThreadPriority;
 
 use crate::chunk_saver::{ChunkStorage, PersistentEntity, registry::WorldStorageRegistry};
 use crate::level_data::{GameTimeSource, LevelDataManager, RespawnData, WorldGenerationSettings};
@@ -107,6 +108,7 @@ use steel_registry::vanilla_game_rules::{
 use steel_registry::{
     RegistryEntry, dimension_type::DimensionTypeRef, vanilla_dimension_types, vanilla_entities,
 };
+use steel_utils::threading::custom_spawn_handler;
 use steel_utils::{
     BlockPos, ChunkPos, Identifier,
     locks::{AsyncMutex, SyncMutex, SyncRwLock},
@@ -228,6 +230,7 @@ pub async fn test_server_with_worlds_and_config(
         .map_err(|error| format!("test permission groups should resolve: {error}"))?;
     let registry_cache = RegistryCache::new(config.compression);
     let chunk_encoding_pool = ThreadPoolBuilder::new()
+        .spawn_handler(custom_spawn_handler(ThreadPriority::Normal))
         .num_threads(1)
         .build()
         .map_err(|error| format!("test chunk encoding pool should initialize: {error}"))?;
@@ -680,7 +683,9 @@ impl Server {
         let mut world_storage = storage_registry.resolve_worlds(&resolved_worlds)?;
 
         let generation_pool: Arc<ThreadPool> = Arc::new({
-            let mut builder = ThreadPoolBuilder::new().thread_name(|i| format!("rayon-gen-{i}"));
+            let mut builder = ThreadPoolBuilder::new()
+                .spawn_handler(custom_spawn_handler(ThreadPriority::Normal))
+                .thread_name(|i| format!("rayon-gen-{i}"));
             if let Some(chunk_generation_threads) =
                 configured_chunk_generation_threads(config.chunk_generation_threads)
             {
@@ -695,8 +700,9 @@ impl Server {
                 .map_err(|e| format!("failed to create generation thread pool: {e}"))?
         });
         let chunk_encoding_pool = Arc::new({
-            let mut builder =
-                ThreadPoolBuilder::new().thread_name(|i| format!("rayon-chunk-encode-{i}"));
+            let mut builder = ThreadPoolBuilder::new()
+                .spawn_handler(custom_spawn_handler(ThreadPriority::Normal))
+                .thread_name(|i| format!("rayon-chunk-encode-{i}"));
             if let Some(chunk_encoding_threads) =
                 configured_chunk_encoding_threads(config.chunk_encoding_threads)
             {

@@ -79,6 +79,7 @@ enum_dispatch.workspace = true
 text_components.workspace = true
 simdnbt.workspace = true
 tracing.workspace = true
+gdt-cpus = "0.2606.1"
 
 [build-dependencies]
 # Extract vanilla datapacks before compiling loot tables.
